@@ -113,6 +113,39 @@ impl Default for Endpoints {
     }
 }
 
+pub const XUANLING_IDP_ID: &str = "f1ea2881fa3bf4783538e526fa3d1f41";
+const XUANLING_BASE: &str = "https://oauth.xuanling.my.id";
+
+impl Endpoints {
+    #[allow(dead_code)]
+    pub fn for_provider(provider: &LoginProvider) -> Self {
+        let mut e = Self::default();
+        if provider.idp_id == XUANLING_IDP_ID {
+            e.device_authorize = format!("{XUANLING_BASE}/device/authorize");
+            e.token = format!("{XUANLING_BASE}/token");
+            e.client_token = format!("{XUANLING_BASE}/client_token");
+            e.userinfo = format!("{XUANLING_BASE}/userinfo");
+            e.graphql = format!("{XUANLING_BASE}/graphql/games");
+            e.subscription = format!("{XUANLING_BASE}/v4/subscriptions");
+            e.account_linking = format!("{XUANLING_BASE}/als/v1");
+        }
+        e
+    }
+}
+
+impl LoginProvider {
+    #[allow(dead_code)]
+    pub fn xuanling() -> Self {
+        Self {
+            idp_id: XUANLING_IDP_ID.to_owned(),
+            code: "XuanLing".to_owned(),
+            display_name: "XuanLing".to_owned(),
+            streaming_service_url: format!("{XUANLING_BASE}/cloudmatchbeta/default/"),
+            priority: 100,
+        }
+    }
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct LoginProvider {
