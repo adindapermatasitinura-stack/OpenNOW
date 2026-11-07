@@ -2396,6 +2396,15 @@ fn cloudmatch_http_error(
 }
 
 pub(crate) fn trusted_cloudmatch_base(raw: &str) -> Result<Url, ServiceError> {
+    // XUANLING-PATCH: allow the XuanLing streaming host
+    if let Ok(xuanling_url) = url::Url::parse(raw.trim()) {
+        if xuanling_url.scheme() == "https"
+            && xuanling_url.host_str() == Some("oauth.xuanling.my.id")
+        {
+            return Ok(xuanling_url);
+        }
+    }
+
     let mut url = Url::parse(raw.trim()).map_err(|_| invalid("Invalid CloudMatch endpoint"))?;
     if url.scheme() != "https"
         || !url.username().is_empty()

@@ -113,6 +113,25 @@ impl Default for Endpoints {
     }
 }
 
+// XUANLING-PATCH: endpoints
+impl Endpoints {
+    #[allow(dead_code)]
+    pub fn xuanling() -> Self {
+        let base = XUANLING_BASE;
+        Self {
+            device_authorize: format!("{base}/device/authorize"),
+            token: format!("{base}/token"),
+            client_token: format!("{base}/client_token"),
+            userinfo: format!("{base}/userinfo"),
+            revoke: format!("{base}/assets/v2/Tokens?level=client"),
+            graphql: format!("{base}/graphql/games"),
+            subscription: format!("{base}/v4/subscriptions"),
+            account_linking: format!("{base}/als/v1"),
+            ..Self::default()
+        }
+    }
+}
+
 pub const XUANLING_IDP_ID: &str = "f1ea2881fa3bf4783538e526fa3d1f41";
 const XUANLING_BASE: &str = "https://oauth.xuanling.my.id";
 
@@ -520,7 +539,7 @@ impl GfnService {
             .pool_idle_timeout(Duration::from_secs(60))
             .build()
             .map_err(|error| error.to_string())?;
-        Ok(Self::with_client(client, Endpoints::default(), data_dir))
+        Ok(Self::with_client(client, Endpoints::xuanling(), data_dir))
     }
 
     fn with_client(client: Client, endpoints: Endpoints, data_dir: PathBuf) -> Self {
@@ -3584,6 +3603,16 @@ fn provider_result(state: &ServiceState) -> Value {
             .any(|provider| provider.idp_id == DEFAULT_IDP_ID)
         {
             providers.push(LoginProvider::default_nvidia());
+        }
+        // XUANLING-PATCH: provider list
+        #[cfg(not(test))]
+        {
+            if !providers
+                .iter()
+                .any(|provider| provider.idp_id == XUANLING_IDP_ID)
+            {
+                providers.push(LoginProvider::xuanling());
+            }
         }
     }
     json!({"providers":providers,"defaultProviderIdpId":state.providers_default,"generation":state.generation,"discovery":{
